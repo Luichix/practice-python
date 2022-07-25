@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    {% include "top/bar.html" %}
+    
+    <h2 style="color: red">Hello, this is my first template with django</h2>
+    
+    {# NO TEMAS DISEÑADOR! #} 
+    
+    {% comment %}
+        IGNORA ESTA PARTE
+    {% endcomment %}
+
+    {% if name_person == 'Profesor Juan' %}
+    <p> This course taught by titular professor </p>
+    {% else %}
+    <p> This course taught by associate professor </p>
+    {% endif %}
+    
+    <p>
+        The name of the teac   her is {{name_person | upper}}, and his last name is {{lastname_person.upper}}.
+    </p>
+    <p>
+        We are seeing the topic of templates the day: {{now.day}} / {{now.month}} / {{now.year}}.
+    </p>
+    <p><strong>Course Topics</strong></p>
+    <p>
+        <ul>
+            {% if topics %}
+                {% for topic in topics %}
+                    <li>{{topic | first | lower}}</li>
+                {% endfor %}
+            {% else %}
+                <p>No topics</p>
+            {% endif %}
+        </ul>
+    </p>
+</body>
+</html>

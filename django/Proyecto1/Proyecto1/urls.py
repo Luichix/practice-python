@@ -17,16 +17,19 @@ from django.contrib import admin
 from django.urls import path
 from Proyecto1.views import hello
 from Proyecto1.views import bay
-from Proyecto1.views import seeyouagain
-from Proyecto1.views import getDate
-from Proyecto1.views import calculateAge
+from Proyecto1.views import see_you_again
+from Proyecto1.views import get_date
+from Proyecto1.views import calculate_age
+from Proyecto1.views import courseC
+from Proyecto1.views import courseCss
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello,),
     path('bay/', bay,),
-    path('seeyouagain/', seeyouagain,),
-    path('getDate/', getDate,),
-    path('age/<int:age>/<int:year>', calculateAge,),
-
+    path('seeyouagain/', see_you_again,),
+    path('getDate/', get_date,),
+    path('age/<int:age>/<int:year>', calculate_age,),
+    path('courseC/', courseC,),
+    path('courseCss/', courseCss,),
 ]
