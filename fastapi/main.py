@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Annotated
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path, Body
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -18,6 +18,11 @@ class Item(BaseModel):
     price: float
     is_offer: bool | None = None
     tax: float | None = None
+
+
+class User(BaseModel):
+    fullname: str
+    username: str
 
 
 class ModelName(str, Enum):
@@ -151,3 +156,34 @@ async def read_fruits_list(
 ):
     query_items = {"q": q}
     return query_items
+
+
+@app.get("/fruits/{fruit_mount}")
+async def read_fruits_list(
+    fruit_id: Annotated[
+        int, Path(title="This title is for path parameter", ge=1, le=10)
+    ],
+    q: Annotated[
+        list[str],
+        Query(
+            title="Query string",
+            description="Query string for the items to search in the database that have a good match",
+            alias="item-query",
+            deprecated=True,
+            include_in_schema=True,
+        ),
+    ] = ["apple", "banana"],
+):
+    query_items = {"q": q}
+    return query_items
+
+
+@app.put("/fruits_update/{fruit_id}")
+async def update_fruit(
+    item: Item,
+    fruit_id: Annotated[int | None, Path(title="Path param")],
+    user: User | None = None,
+    q: Annotated[str | None, Query(title="query param")] = None,
+    importance: Annotated[bool | None, Body()] = None,
+):
+    return {"fruit_id": fruit_id}
