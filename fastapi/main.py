@@ -1,7 +1,17 @@
 from enum import Enum
 from typing import Annotated
 from fastapi import FastAPI, Query, Path, Body
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, HttpUrl
+from datetime import datetime, date, timedelta
+from uuid import UUID
+
+# pip install python-multipart
+# from fastapi import FastAPI, File, UploadFile
+# from fastapi.responses import HTMLResponse
+
+# import pydantic
+
+# print("version", pydantic.__version__)
 
 app = FastAPI()
 
@@ -12,12 +22,41 @@ fake_elements_db = [
 ]
 
 
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "url": "https://avatars.githubusercontent.com/u/73667747?s=400&v=4",
+                    "name": "Luichix",
+                }
+            ]
+        }
+    }
+
+
 class Item(BaseModel):
+    name: str
+    description: str | None = Field(
+        default=None,
+        title="The description of the item",
+        max_length=300,
+        examples=["A very nice item"],
+    )
+    price: float = Field(gt=0, description="The price must be greater than zero")
+    is_offer: bool | None = None
+    tax: float | None = None
+    tags: set[str] = set()
+    images: list[Image] | None = None
+
+
+class Offer(BaseModel):
     name: str
     description: str | None = None
     price: float
-    is_offer: bool | None = None
-    tax: float | None = None
+    items: list[Item]
 
 
 class User(BaseModel):
@@ -187,3 +226,72 @@ async def update_fruit(
     importance: Annotated[bool | None, Body()] = None,
 ):
     return {"fruit_id": fruit_id}
+
+
+@app.post("/offers/")
+async def create_offer(offer: Offer) -> Offer:
+    return offer
+
+
+@app.post("/images/multiple/")
+async def create_multiple_images(images: list[Image]) -> list[Image]:
+    return images
+
+
+@app.post("/index-weights")
+async def create_index_weights(weights: dict[int, float]):
+    return weights
+
+
+@app.put("/process/{process_id}")
+async def update_process(
+    process_id: UUID,
+    start_datetime: Annotated[datetime | None, Body()] = None,
+    end_datetime: Annotated[datetime | None, Body()] = None,
+    repeat_at: Annotated[date | None, Body()] = None,
+    process_after: Annotated[timedelta | None, Body()] = None,
+):
+    start_process = start_datetime + process_after
+    duration = end_datetime - start_process
+    return {
+        "item_id": process_id,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+        "repeat_at": repeat_at,
+        "process_after": process_after,
+        "start_process": start_process,
+        "duration": duration,
+    }
+
+
+# @app.post("/files/")
+# async def create_files(
+#     files: Annotated[list[bytes], File(description="Multiple files as bytes")],
+# ):
+#     return {"file_sizes": [len(file) for file in files]}
+
+
+# @app.post("/uploadfiles/")
+# async def create_upload_files(
+#     files: Annotated[
+#         list[UploadFile], File(description="Multiple files as UploadFile")
+#     ],
+# ):
+#     return {"filenames": [file.filename for file in files]}
+
+
+# @app.get("/html-files")
+# async def main():
+#     content = """
+# <body>
+# <form action="/files/" enctype="multipart/form-data" method="post">
+# <input name="files" type="file" multiple>
+# <input type="submit">
+# </form>
+# <form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+# <input name="files" type="file" multiple>
+# <input type="submit">
+# </form>
+# </body>
+#     """
+#     return HTMLResponse(content=content)
